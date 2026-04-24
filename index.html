@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Omnithia — Experience Before You Own</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --black:#070708;
+  --deep:#0e0e10;
+  --surface:#141416;
+  --gold:#c9a96e;
+  --gold-dim:rgba(201,169,110,0.15);
+  --gold-line:rgba(201,169,110,0.25);
+  --cream:#f0e8d8;
+  --text:#e8e0d0;
+  --muted:rgba(232,224,208,0.45);
+  --dimmer:rgba(232,224,208,0.2);
+  --purple:#5b4fcf;
+  --r:0px;
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);overflow-x:hidden;cursor:none}
+
+/* CURSOR */
+#cur{position:fixed;width:6px;height:6px;background:var(--gold);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform .1s,width .2s,height .2s}
+#cur-ring{position:fixed;width:32px;height:32px;border:1px solid var(--gold-line);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .25s,height .25s,border-color .25s}
+body:has(a:hover) #cur,body:has(button:hover) #cur{transform:translate(-50%,-50%) scale(0);opacity:0}
+body:has(a:hover) #cur-ring,body:has(button:hover) #cur-ring{width:52px;height:52px;border-color:var(--gold)}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 60px;height:72px;display:flex;align-items:center;justify-content:space-between;background:rgba(7,7,8,0);transition:background .4s,backdrop-filter .4s}
+nav.scrolled{background:rgba(7,7,8,.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--gold-line)}
+.nav-logo{font-family:'Playfair Display',serif;font-size:18px;font-weight:400;letter-spacing:.12em;color:var(--cream);text-decoration:none}
+.nav-logo span{color:var(--gold)}
+.nav-links{display:flex;gap:40px;list-style:none}
+.nav-links a{font-size:12px;font-weight:400;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:var(--cream)}
+.nav-right{display:flex;align-items:center;gap:16px}
+.btn-nav{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:var(--cream);background:none;border:1px solid var(--gold-line);padding:9px 22px;cursor:none;text-decoration:none;transition:border-color .2s,background .2s}
+.btn-nav:hover{border-color:var(--gold);background:var(--gold-dim)}
+.btn-nav.solid{background:var(--gold);color:var(--black);border-color:var(--gold)}
+.btn-nav.solid:hover{background:var(--cream)}
+
+/* LANG */
+.lang-wrap{position:relative}
+.lang-trigger{display:flex;align-items:center;gap:6px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:none;border:1px solid var(--gold-line);padding:7px 12px;cursor:none;transition:all .2s}
+.lang-trigger:hover{color:var(--cream);border-color:var(--gold)}
+.lang-trigger .flag{font-size:13px}
+.lang-drop{position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--gold-line);min-width:170px;opacity:0;pointer-events:none;transform:translateY(-6px);transition:opacity .2s,transform .2s}
+.lang-wrap.open .lang-drop{opacity:1;pointer-events:all;transform:translateY(0)}
+.lang-opt{display:flex;align-items:center;gap:10px;padding:10px 14px;font-size:12px;color:var(--muted);cursor:none;transition:all .15s}
+.lang-opt:hover,.lang-opt.active{background:var(--gold-dim);color:var(--cream)}
+.lang-opt .native{margin-left:auto;font-size:10px;opacity:.5}
+
+/* HERO */
+.hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:120px 60px 80px}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 40%,rgba(201,169,110,.06) 0%,transparent 70%)}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(201,169,110,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(201,169,110,.03) 1px,transparent 1px);background-size:80px 80px}
+.hero-content{position:relative;z-index:2;text-align:center;max-width:900px}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:12px;font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:40px}
+.hero-eyebrow::before,.hero-eyebrow::after{content:'';display:block;width:40px;height:1px;background:var(--gold-line)}
+.hero-h1{font-family:'Playfair Display',serif;font-weight:400;font-size:clamp(52px,7vw,96px);line-height:1;letter-spacing:-.02em;color:var(--cream);margin-bottom:12px}
+.hero-h1 em{font-style:italic;color:var(--gold)}
+.hero-h1 .line2{display:block;font-size:clamp(32px,4.5vw,64px);color:var(--muted);margin-top:8px}
+.hero-sub{font-size:16px;font-weight:300;line-height:1.8;color:var(--muted);max-width:520px;margin:36px auto 48px}
+.hero-ctas{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap}
+.btn-hero{font-family:'DM Sans',sans-serif;font-size:13px;letter-spacing:.12em;text-transform:uppercase;padding:16px 36px;text-decoration:none;cursor:none;transition:all .25s}
+.btn-hero.primary{background:var(--gold);color:var(--black);font-weight:500}
+.btn-hero.primary:hover{background:var(--cream);transform:translateY(-2px)}
+.btn-hero.ghost{background:none;color:var(--cream);border:1px solid var(--gold-line)}
+.btn-hero.ghost:hover{border-color:var(--gold);background:var(--gold-dim)}
+.hero-scroll{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--dimmer);font-size:10px;letter-spacing:.2em;text-transform:uppercase}
+.scroll-line{width:1px;height:48px;background:linear-gradient(to bottom,var(--gold-line),transparent);animation:scrollDrop 2s ease-in-out infinite}
+@keyframes scrollDrop{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* MARQUEE */
+.marquee-section{border-top:1px solid var(--gold-line);border-bottom:1px solid var(--gold-line);padding:18px 0;overflow:hidden;background:var(--deep)}
+.marquee-track{display:flex;gap:0;animation:marquee 24s linear infinite;white-space:nowrap}
+.marquee-track:hover{animation-play-state:paused}
+.marquee-item{display:inline-flex;align-items:center;gap:16px;padding:0 32px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--dimmer)}
+.marquee-dot{width:4px;height:4px;border-radius:50%;background:var(--gold);flex-shrink:0}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* PROBLEM SECTION */
+.problem-section{padding:140px 60px;max-width:1300px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:center}
+.problem-left{}
+.problem-tag{font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:24px}
+.problem-title{font-family:'Playfair Display',serif;font-weight:400;font-size:clamp(32px,3.5vw,52px);line-height:1.15;color:var(--cream);margin-bottom:28px}
+.problem-title em{font-style:italic;color:var(--gold)}
+.problem-body{font-size:15px;font-weight:300;line-height:1.9;color:var(--muted);margin-bottom:20px}
+.problem-signature{display:flex;align-items:center;gap:14px;margin-top:40px;padding-top:32px;border-top:1px solid var(--gold-line)}
+.sig-av{width:44px;height:44px;border-radius:50%;background:var(--gold-dim);border:1px solid var(--gold-line);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--gold);flex-shrink:0}
+.sig-name{font-size:14px;font-weight:500;color:var(--cream)}
+.sig-role{font-size:11px;color:var(--dimmer);margin-top:2px;letter-spacing:.05em}
+
+/* REVIEWS CLOUD */
+.reviews-cloud{position:relative;min-height:520px}
+.reviews-header{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--dimmer);border:1px solid rgba(255,255,255,.08);display:inline-block;padding:4px 14px;margin-bottom:24px}
+.review-card{position:absolute;background:var(--surface);border:1px solid rgba(255,255,255,.07);padding:18px 20px;max-width:230px;animation:rFloat linear infinite}
+.review-card::after{content:'';position:absolute;bottom:-8px;left:18px;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:8px solid var(--surface)}
+.r-stars{font-size:10px;color:#f59e0b;letter-spacing:2px;margin-bottom:8px}
+.r-text{font-size:12px;font-weight:300;line-height:1.55;color:rgba(232,224,208,.5);font-style:italic}
+.r-source{font-size:9px;color:var(--dimmer);margin-top:8px;letter-spacing:.08em}
+@keyframes rFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.rc1{top:4%;left:2%;animation-duration:6s;animation-delay:0s}
+.rc2{top:2%;right:0%;animation-duration:7.5s;animation-delay:-2s}
+.rc3{top:37%;left:3%;animation-duration:5.5s;animation-delay:-1s}
+.rc4{top:37%;right:0%;animation-duration:8s;animation-delay:-3.5s}
+.rc5{bottom:2%;left:5%;animation-duration:6.5s;animation-delay:-.5s}
+.rc6{bottom:2%;right:0%;animation-duration:7s;animation-delay:-4s}
+
+/* HOW IT WORKS */
+.how-section{background:var(--deep);padding:140px 60px}
+.how-inner{max-width:1300px;margin:0 auto}
+.section-header{margin-bottom:80px}
+.section-tag{font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:20px}
+.section-h2{font-family:'Playfair Display',serif;font-weight:400;font-size:clamp(36px,4vw,58px);line-height:1.1;color:var(--cream)}
+.section-h2 em{font-style:italic;color:var(--gold)}
+.steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--gold-line)}
+.step{background:var(--deep);padding:48px 40px;position:relative;transition:background .3s}
+.step:hover{background:var(--surface)}
+.step-num{font-family:'Playfair Display',serif;font-size:72px;font-weight:400;color:rgba(201,169,110,.1);line-height:1;margin-bottom:32px}
+.step-icon{width:36px;height:36px;margin-bottom:20px}
+.step-icon svg{width:100%;height:100%;fill:none;stroke:var(--gold);stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
+.step-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:400;color:var(--cream);margin-bottom:12px}
+.step-desc{font-size:13px;font-weight:300;line-height:1.75;color:var(--muted)}
+.step-line{position:absolute;top:48px;right:0;width:1px;height:60px;background:var(--gold-line)}
+.step:last-child .step-line{display:none}
+
+/* DUAL */
+.dual-section{padding:0 60px 140px;max-width:1300px;margin:0 auto}
+.dual-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--gold-line)}
+.dual-card{padding:60px 52px}
+.dual-card.light{background:var(--cream)}
+.dual-card.dark-card{background:var(--black)}
+.d-label{font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:24px}
+.dual-card.light .d-label{color:rgba(91,79,207,.8)}
+.d-title{font-family:'Playfair Display',serif;font-weight:400;font-size:clamp(26px,2.8vw,38px);line-height:1.2;color:var(--black);margin-bottom:18px}
+.dual-card.dark-card .d-title{color:var(--cream)}
+.d-title em{font-style:italic;color:var(--purple)}
+.dual-card.dark-card .d-title em{color:var(--gold)}
+.d-desc{font-size:14px;font-weight:300;line-height:1.8;color:rgba(14,14,16,.65);margin-bottom:36px}
+.dual-card.dark-card .d-desc{color:var(--muted)}
+.d-features{display:flex;flex-direction:column;gap:14px;margin-bottom:40px}
+.d-feature{display:flex;align-items:flex-start;gap:12px}
+.d-dash{width:16px;height:1px;background:var(--purple);margin-top:10px;flex-shrink:0}
+.dual-card.dark-card .d-dash{background:var(--gold)}
+.d-feat-text{font-size:13px;line-height:1.65;color:rgba(14,14,16,.6)}
+.dual-card.dark-card .d-feat-text{color:var(--muted)}
+.d-feat-text strong{font-weight:500;color:var(--black);display:block}
+.dual-card.dark-card .d-feat-text strong{color:var(--cream)}
+.btn-dual{font-family:'DM Sans',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;padding:14px 28px;text-decoration:none;cursor:none;transition:all .2s;display:inline-block}
+.btn-dual.dark-btn{background:var(--black);color:var(--cream);border:none}
+.btn-dual.dark-btn:hover{background:var(--deep)}
+.btn-dual.gold-btn{background:var(--gold);color:var(--black);border:none}
+.btn-dual.gold-btn:hover{background:var(--cream)}
+
+/* PLATFORMS */
+.platforms-section{padding:140px 60px;background:var(--surface)}
+.platforms-inner{max-width:1300px;margin:0 auto}
+.platforms-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:80px}
+.platform-card{border:1px solid var(--gold-line);padding:44px 36px;position:relative;transition:border-color .3s,transform .3s;background:var(--black)}
+.platform-card:hover{border-color:var(--gold);transform:translateY(-4px)}
+.platform-card.featured{border-color:rgba(201,169,110,.4);background:var(--deep)}
+.p-num{font-family:'Playfair Display',serif;font-size:80px;font-weight:400;color:rgba(201,169,110,.08);line-height:1;margin-bottom:24px}
+.platform-card.featured .p-num{color:rgba(201,169,110,.12)}
+.p-badge{position:absolute;top:28px;right:28px;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold-line);padding:4px 10px}
+.p-badge.soon{color:var(--dimmer);border-color:rgba(232,224,208,.1)}
+.p-badge.ready{background:var(--gold-dim)}
+.p-name{font-family:'Playfair Display',serif;font-size:22px;font-weight:400;color:var(--cream);margin-bottom:10px}
+.p-desc{font-size:13px;font-weight:300;line-height:1.7;color:var(--muted)}
+
+/* WAITLIST */
+.waitlist-section{padding:160px 60px;text-align:center;position:relative;overflow:hidden;background:var(--black)}
+.wl-bg{position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 50% 50%,rgba(201,169,110,.07) 0%,transparent 70%)}
+.wl-inner{position:relative;z-index:2;max-width:720px;margin:0 auto}
+.wl-ornament{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:40px}
+.wl-ornament-line{width:60px;height:1px;background:var(--gold-line)}
+.wl-ornament-diamond{width:6px;height:6px;background:var(--gold);transform:rotate(45deg)}
+.wl-title{font-family:'Playfair Display',serif;font-weight:400;font-size:clamp(40px,5.5vw,72px);line-height:1.05;color:var(--cream);margin-bottom:20px}
+.wl-title em{font-style:italic;color:var(--gold)}
+.wl-sub{font-size:16px;font-weight:300;line-height:1.8;color:var(--muted);margin-bottom:48px}
+.wl-form{display:flex;gap:0;justify-content:center;max-width:500px;margin:0 auto 16px}
+.wl-input{flex:1;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;padding:16px 20px;background:var(--surface);border:1px solid var(--gold-line);border-right:none;color:var(--cream);outline:none;transition:border-color .2s}
+.wl-input::placeholder{color:var(--dimmer)}
+.wl-input:focus{border-color:var(--gold)}
+.wl-btn{font-family:'DM Sans',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;padding:16px 28px;background:var(--gold);color:var(--black);border:none;cursor:none;white-space:nowrap;transition:background .2s;font-weight:500}
+.wl-btn:hover{background:var(--cream)}
+.wl-note{font-size:11px;color:var(--dimmer);letter-spacing:.06em}
+
+/* INVESTOR */
+.investor-section{background:var(--deep);border-top:1px solid var(--gold-line);padding:56px 60px}
+.investor-inner{max-width:1300px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap}
+.inv-left{}
+.inv-eyebrow{font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:12px}
+.inv-text{font-family:'Playfair Display',serif;font-weight:300;font-size:22px;color:rgba(240,232,216,.65);line-height:1.5}
+.inv-text em{font-style:italic;color:var(--cream)}
+.btn-inv{font-family:'DM Sans',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;padding:14px 28px;background:none;color:var(--cream);border:1px solid var(--gold-line);cursor:none;text-decoration:none;transition:all .2s;white-space:nowrap}
+.btn-inv:hover{border-color:var(--gold);background:var(--gold-dim)}
+
+/* CTA */
+.cta-section{padding:120px 60px;background:var(--surface);border-top:1px solid var(--gold-line)}
+.cta-inner{max-width:1300px;margin:0 auto;display:grid;grid-template-columns:1fr auto;gap:60px;align-items:center}
+.cta-title{font-family:'Playfair Display',serif;font-weight:400;font-size:clamp(36px,4.5vw,60px);line-height:1.1;color:var(--cream);margin-bottom:12px}
+.cta-title em{font-style:italic;color:var(--gold)}
+.cta-sub{font-size:15px;font-weight:300;color:var(--muted)}
+.cta-actions{display:flex;flex-direction:column;gap:12px;align-items:flex-end}
+.cta-note{font-size:11px;color:var(--dimmer);letter-spacing:.06em}
+
+/* FOOTER */
+footer{background:var(--black);padding:64px 60px 32px;border-top:1px solid var(--gold-line)}
+.footer-inner{max-width:1300px;margin:0 auto}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px;margin-bottom:52px}
+.footer-brand{}
+.footer-logo{font-family:'Playfair Display',serif;font-size:18px;letter-spacing:.12em;color:var(--cream);display:block;margin-bottom:14px}
+.footer-logo span{color:var(--gold)}
+.footer-tagline{font-size:12px;font-weight:300;color:var(--dimmer);line-height:1.7;max-width:240px}
+.footer-col-title{font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:18px}
+.footer-links{display:flex;flex-direction:column;gap:10px}
+.footer-links a{font-size:13px;font-weight:300;color:var(--muted);text-decoration:none;transition:color .2s}
+.footer-links a:hover{color:var(--cream)}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;padding-top:28px;border-top:1px solid rgba(201,169,110,.1)}
+.footer-copy{font-size:11px;color:var(--dimmer);letter-spacing:.06em}
+.footer-legal{display:flex;gap:24px}
+.footer-legal a{font-size:11px;color:var(--dimmer);text-decoration:none;transition:color .2s}
+.footer-legal a:hover{color:var(--muted)}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .8s cubic-bezier(.22,1,.36,1),transform .8s cubic-bezier(.22,1,.36,1)}
+.reveal.visible{opacity:1;transform:none}
+.reveal-left{opacity:0;transform:translateX(-28px);transition:opacity .8s cubic-bezier(.22,1,.36,1),transform .8s cubic-bezier(.22,1,.36,1)}
+.reveal-left.visible{opacity:1;transform:none}
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+  .problem-section,.cta-inner{grid-template-columns:1fr;gap:60px}
+  .steps-grid{grid-template-columns:1fr}
+  .dual-grid{grid-template-columns:1fr}
+  .platforms-grid{grid-template-columns:1fr}
+  .footer-top{grid-template-columns:1fr 1fr;gap:36px}
+}
+@media(max-width:640px){
+  nav{padding:0 24px}
+  .nav-links{display:none}
+  .hero,.problem-section,.how-section,.dual-section,.platforms-section,.waitlist-section,.investor-section,.cta-section{padding-left:24px;padding-right:24px}
+  footer{padding:48px 24px 24px}
+  .footer-top{grid-template-columns:1fr}
+  .wl-form{flex-direction:column}
+  .wl-input{border-right:1px solid var(--gold-line)}
+  .hero-ctas{flex-direction:column;align-items:center}
+}
+</style>
+</head>
+<body>
+<div id="cur"></div>
+<div id="cur-ring"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a class="nav-logo" href="#">OMNIT<span>HIA</span></a>
+  <ul class="nav-links">
+    <li><a href="#how" data-i18n="nav_how">How It Works</a></li>
+    <li><a href="#for-you" data-i18n="nav_shopping">Shopping</a></li>
+    <li><a href="#for-brands" data-i18n="nav_brands">For Brands</a></li>
+    <li><a href="#platforms" data-i18n="nav_platforms">Platforms</a></li>
+  </ul>
+  <div class="nav-right">
+    <a class="btn-nav" href="#" data-i18n="nav_signin">Sign In</a>
+    <div class="lang-wrap" id="langWrap">
+      <button class="lang-trigger" id="langTrigger">
+        <span class="flag" id="lFlag">🇬🇧</span>
+        <span id="lCode">EN</span>
+        <span style="font-size:8px;opacity:.5">▼</span>
+      </button>
+      <div class="lang-drop" id="langDrop">
+        <div class="lang-opt active" data-lang="en"><span class="flag">🇬🇧</span> English <span class="native">English</span></div>
+        <div class="lang-opt" data-lang="tr"><span class="flag">🇹🇷</span> Turkish <span class="native">Türkçe</span></div>
+        <div class="lang-opt" data-lang="de"><span class="flag">🇩🇪</span> German <span class="native">Deutsch</span></div>
+        <div class="lang-opt" data-lang="fr"><span class="flag">🇫🇷</span> French <span class="native">Français</span></div>
+        <div class="lang-opt" data-lang="it"><span class="flag">🇮🇹</span> Italian <span class="native">Italiano</span></div>
+        <div class="lang-opt" data-lang="es"><span class="flag">🇪🇸</span> Spanish <span class="native">Español</span></div>
+        <div class="lang-opt" data-lang="pt"><span class="flag">🇧🇷</span> Portuguese <span class="native">Português</span></div>
+      </div>
+    </div>
+    <a class="btn-nav solid" href="#waitlist" data-i18n="nav_early">Early Access</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow reveal"><span data-i18n="tagline">What begins, becomes.</span></div>
+    <h1 class="hero-h1 reveal">
+      <span data-i18n="hero_h1a">Feel it</span> <em data-i18n="hero_h1b">before</em>
+      <span class="line2" data-i18n="hero_h1c">you wear it.</span>
+    </h1>
+    <p class="hero-sub reveal" data-i18n="hero_sub">Shopping is no longer a guessing game. See it on your virtual twin before you decide — open a store or just shop, it's your universe.</p>
+    <div class="hero-ctas reveal">
+      <a class="btn-hero primary" href="#waitlist" data-i18n="hero_cta1">Get Early Access</a>
+      <a class="btn-hero ghost" href="#how" data-i18n="hero_cta2">How It Works</a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    <span data-i18n="hero_scroll">Scroll</span>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-section">
+  <div class="marquee-track" id="marquee">
+    <span class="marquee-item"><span class="marquee-dot"></span><span data-i18n="mq1">Virtual Twin Technology</span></span>
+    <span class="marquee-item"><span class="marquee-dot"></span><span data-i18n="mq2">3D Commerce Platform</span></span>
+    <span class="marquee-item"><span class="marquee-dot"></span><span data-i18n="mq3">Social Fitting Room</span></span>
+    <span class="marquee-item"><span class="marquee-dot"></span><span data-i18n="mq4">Zero Returns Vision</span></span>
+    <span class="marquee-item"><span class="marquee-dot"></span><span data-i18n="mq5">Mobile · PC · VR</span></span>
+    <span class="marquee-item"><span class="marquee-dot"></span><span data-i18n="mq6">Experience Before You Own</span></span>
+    <span class="marquee-item"><span class="marquee-dot"></span><span data-i18n="mq1">Virtual Twin Technology</span></span>
+    <span class="marquee-item"><span class="marquee-dot"></span><span data-i18n="mq2">3D Commerce Platform</span></span>
+    <span class="marquee-item"><span class="marquee-dot"></span><span data-i18n="mq3">Social Fitting Room</span></span>
+    <span class="marquee-item"><span class="marquee-dot"></span><span data-i18n="mq4">Zero Returns Vision</span></span>
+    <span class="marquee-item"><span class="marquee-dot"></span><span data-i18n="mq5">Mobile · PC · VR</span></span>
+    <span class="marquee-item"><span class="marquee-dot"></span><span data-i18n="mq6">Experience Before You Own</span></span>
+  </div>
+</div>
+
+<!-- PROBLEM -->
+<section>
+  <div class="problem-section">
+    <div class="problem-left">
+      <span class="problem-tag reveal" data-i18n="origin_tag">Why Omnithia</span>
+      <h2 class="problem-title reveal"><span data-i18n="origin_title1">Born from a problem.</span><br><em data-i18n="origin_title2">Built into a universe.</em></h2>
+      <p class="problem-body reveal" data-i18n="origin_body1">Millions of people order clothes online every day. The package arrives, they try it on — it never looks the way they imagined. They return it. The cycle never ends, because e-commerce still chains you to a flat screen.</p>
+      <p class="problem-body reveal" data-i18n="origin_body2">Omnithia breaks that cycle. Dress your virtual twin, see it from every angle — then decide.</p>
+      <div class="problem-signature reveal">
+        <div class="sig-av">MD</div>
+        <div>
+          <div class="sig-name" data-i18n="founder_name">Melihcan Demir</div>
+          <div class="sig-role" data-i18n="founder_role">Founder, Omnithia</div>
+        </div>
+      </div>
+    </div>
+    <div class="reviews-cloud reveal">
+      <div class="reviews-header" data-i18n="cloud_label">Other e-commerce</div>
+      <div class="review-card rc1">
+        <div class="r-stars">★☆☆☆☆</div>
+        <div class="r-text" data-i18n="bubble1">"Nothing like the photo. Completely different colour in real life."</div>
+        <div class="r-source" data-i18n="bubble_source">— Verified purchase</div>
+      </div>
+      <div class="review-card rc2">
+        <div class="r-stars">★★☆☆☆</div>
+        <div class="r-text" data-i18n="bubble2">"Ordered a medium, fits like an XS. Sending it back."</div>
+        <div class="r-source" data-i18n="bubble_source">— Verified purchase</div>
+      </div>
+      <div class="review-card rc3">
+        <div class="r-stars">★☆☆☆☆</div>
+        <div class="r-text" data-i18n="bubble3">"I imagined it would look great on me. It didn't. At all."</div>
+        <div class="r-source" data-i18n="bubble_source">— Verified purchase</div>
+      </div>
+      <div class="review-card rc4">
+        <div class="r-stars">★★☆☆☆</div>
+        <div class="r-text" data-i18n="bubble4">"Fabric looks luxurious in the pictures. Feels cheap in person."</div>
+        <div class="r-source" data-i18n="bubble_source">— Verified purchase</div>
+      </div>
+      <div class="review-card rc5">
+        <div class="r-stars">★☆☆☆☆</div>
+        <div class="r-text" data-i18n="bubble5">"They sent me a completely different item. Third time this month."</div>
+        <div class="r-source" data-i18n="bubble_source">— Verified purchase</div>
+      </div>
+      <div class="review-card rc6">
+        <div class="r-stars">★★☆☆☆</div>
+        <div class="r-text" data-i18n="bubble6">"Never ordering clothes online again. I can't tell what I'm buying."</div>
+        <div class="r-source" data-i18n="bubble_source">— Verified purchase</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" class="how-section">
+  <div class="how-inner">
+    <div class="section-header">
+      <span class="section-tag reveal" data-i18n="how_tag">How It Works</span>
+      <h2 class="section-h2 reveal"><span data-i18n="how_title">Three steps to a</span> <em data-i18n="how_title_em">real experience.</em></h2>
+    </div>
+    <div class="steps-grid reveal">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-icon"><svg viewBox="0 0 22 22"><circle cx="11" cy="9" r="4"/><path d="M4 19c0-3.9 3.1-7 7-7h2c3.9 0 7 3.1 7 7"/></svg></div>
+        <div class="step-title" data-i18n="step1_title">Create your virtual twin</div>
+        <p class="step-desc" data-i18n="step1_desc">Take a few photos with your phone. Omnithia builds your personal 3D avatar using your real body measurements.</p>
+        <div class="step-line"></div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-icon"><svg viewBox="0 0 22 22"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+        <div class="step-title" data-i18n="step2_title">Explore the virtual store</div>
+        <p class="step-desc" data-i18n="step2_desc">Browse hundreds of brands. Find what you love, step into the fitting room — invite your friends too.</p>
+        <div class="step-line"></div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-icon"><svg viewBox="0 0 22 22"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <div class="step-title" data-i18n="step3_title">Wear it, see it, decide</div>
+        <p class="step-desc" data-i18n="step3_desc">Dress your virtual twin. Inspect it from every angle. Buy with confidence — no surprises.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DUAL -->
+<div id="for-you" class="dual-section" style="padding-top:140px">
+  <div class="dual-grid">
+    <div class="dual-card light">
+      <span class="d-label" data-i18n="for_shoppers_tag">For Shoppers</span>
+      <h2 class="d-title"><span data-i18n="for_shoppers_h">Truly feel it</span><br><em data-i18n="for_shoppers_h_em">before you buy.</em></h2>
+      <p class="d-desc" data-i18n="for_shoppers_desc">You don't have to trust a photo anymore. See how it fits, whether it's the right size — don't shop without knowing.</p>
+      <div class="d-features">
+        <div class="d-feature"><div class="d-dash"></div><div class="d-feat-text"><strong data-i18n="feat1_title">Personal virtual twin</strong><span data-i18n="feat1_desc">An avatar built with your exact measurements and appearance.</span></div></div>
+        <div class="d-feature"><div class="d-dash"></div><div class="d-feat-text"><strong data-i18n="feat2_title">Social fitting room</strong><span data-i18n="feat2_desc">Invite friends into your fitting room and decide together.</span></div></div>
+        <div class="d-feature"><div class="d-dash"></div><div class="d-feat-text"><strong data-i18n="feat3_title">Buy with confidence</strong><span data-i18n="feat3_desc">No regrets, no surprises — exactly what you wanted.</span></div></div>
+      </div>
+      <a class="btn-dual dark-btn" href="#waitlist" data-i18n="hero_cta1">Get Early Access</a>
+    </div>
+    <div id="for-brands" class="dual-card dark-card">
+      <span class="d-label" data-i18n="for_brands_tag">For Brands</span>
+      <h2 class="d-title"><span data-i18n="for_brands_h">Invite your customers</span><br><em data-i18n="for_brands_h_em">into your universe.</em></h2>
+      <p class="d-desc" data-i18n="for_brands_desc">Open a store on Omnithia, present your products in 3D — let your customers try them on and see for themselves before buying.</p>
+      <div class="d-features">
+        <div class="d-feature"><div class="d-dash"></div><div class="d-feat-text"><strong data-i18n="bfeat1_title">Virtual store setup</strong><span data-i18n="bfeat1_desc">Your brand, your layout — inside the Omnithia mall.</span></div></div>
+        <div class="d-feature"><div class="d-dash"></div><div class="d-feat-text"><strong data-i18n="bfeat2_title">3D product experience</strong><span data-i18n="bfeat2_desc">Let your customers truly try on your products.</span></div></div>
+        <div class="d-feature"><div class="d-dash"></div><div class="d-feat-text"><strong data-i18n="bfeat3_title">Fewer returns, more trust</strong><span data-i18n="bfeat3_desc">Sell without sizing uncertainty.</span></div></div>
+      </div>
+      <a class="btn-dual gold-btn" href="#waitlist" data-i18n="brands_cta">Apply for a Store</a>
+    </div>
+  </div>
+</div>
+
+<!-- PLATFORMS -->
+<section id="platforms" class="platforms-section">
+  <div class="platforms-inner">
+    <div class="section-header">
+      <span class="section-tag reveal" data-i18n="plat_tag">Platforms</span>
+      <h2 class="section-h2 reveal"><span data-i18n="plat_title">Every device,</span> <em data-i18n="plat_title_em">full experience.</em></h2>
+    </div>
+    <div class="platforms-grid">
+      <div class="platform-card reveal">
+        <div class="p-num">01</div>
+        <div class="p-badge" data-i18n="plat1_badge">In Development</div>
+        <div class="p-name" data-i18n="plat1_name">Mobile</div>
+        <p class="p-desc" data-i18n="plat1_desc">The flow you know, with a new dimension. Add to cart, dress your virtual twin, rotate — decide.</p>
+      </div>
+      <div class="platform-card featured reveal">
+        <div class="p-num">02</div>
+        <div class="p-badge ready" data-i18n="plat2_badge">Prototype Ready</div>
+        <div class="p-name" data-i18n="plat2_name">PC — 3D Universe</div>
+        <p class="p-desc" data-i18n="plat2_desc">Roam freely through the virtual mall. Visit stores, enter the fitting room, invite your friends. Shopping becomes an experience.</p>
+      </div>
+      <div class="platform-card reveal">
+        <div class="p-num">03</div>
+        <div class="p-badge soon" data-i18n="plat3_badge">Coming Soon</div>
+        <div class="p-name" data-i18n="plat3_name">VR</div>
+        <p class="p-desc" data-i18n="plat3_desc">Full immersion. Feel the clothing on you for real. The deepest layer of the Omnithia universe.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WAITLIST -->
+<section id="waitlist" class="waitlist-section">
+  <div class="wl-bg"></div>
+  <div class="wl-inner">
+    <div class="wl-ornament reveal">
+      <div class="wl-ornament-line"></div>
+      <div class="wl-ornament-diamond"></div>
+      <div class="wl-ornament-line"></div>
+    </div>
+    <h2 class="wl-title reveal"><span data-i18n="wait_title">Be among the</span><br><em data-i18n="wait_title_em">first to experience it.</em></h2>
+    <p class="wl-sub reveal" data-i18n="wait_sub">We'll let you know when Omnithia opens. Whether you want to shop or open a store.</p>
+    <div class="wl-form reveal">
+      <input class="wl-input" type="email" data-i18n-placeholder="wait_placeholder" placeholder="Your email address" />
+      <button class="wl-btn" data-i18n="wait_btn">Join the List</button>
+    </div>
+    <p class="wl-note reveal" data-i18n="wait_note">No spam. Unsubscribe anytime.</p>
+  </div>
+</section>
+
+<!-- INVESTOR -->
+<div class="investor-section">
+  <div class="investor-inner">
+    <div class="inv-left">
+      <span class="inv-eyebrow" data-i18n="inv_tag">For Investors</span>
+      <div class="inv-text"><span data-i18n="inv_text">Omnithia is transforming e-commerce into</span> <em data-i18n="inv_text_em">a virtual experience.</em><br><span data-i18n="inv_text2">If you want to join the team or invest, let's talk.</span></div>
+    </div>
+    <a class="btn-inv" href="#" data-i18n="inv_btn">Get in Touch</a>
+  </div>
+</div>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-inner">
+    <div>
+      <h2 class="cta-title reveal">What begins,<br><em>becomes.</em></h2>
+      <p class="cta-sub reveal" data-i18n="cta_sub">Omnithia is just beginning. Be part of it from the start.</p>
+    </div>
+    <div class="cta-actions reveal">
+      <a class="btn-hero primary" href="#waitlist" data-i18n="hero_cta1">Get Early Access</a>
+      <span class="cta-note" data-i18n="cta_note">Free · No commitment</span>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <span class="footer-logo">OMNIT<span>HIA</span></span>
+        <p class="footer-tagline" data-i18n="footer_desc">The platform transforming e-commerce into a virtual experience. See before you buy. Experience before you decide.</p>
+      </div>
+      <div>
+        <span class="footer-col-title" data-i18n="footer_col1">Platform</span>
+        <div class="footer-links">
+          <a href="#" data-i18n="nav_how">How It Works</a>
+          <a href="#" data-i18n="nav_shopping">Shopping</a>
+          <a href="#" data-i18n="nav_brands">For Brands</a>
+          <a href="#" data-i18n="nav_platforms">Platforms</a>
+        </div>
+      </div>
+      <div>
+        <span class="footer-col-title" data-i18n="footer_col2">Company</span>
+        <div class="footer-links">
+          <a href="#" data-i18n="footer_about">About</a>
+          <a href="#" data-i18n="footer_contact">Contact</a>
+          <a href="#" data-i18n="footer_careers">Careers</a>
+          <a href="#" data-i18n="footer_press">Press</a>
+        </div>
+      </div>
+      <div>
+        <span class="footer-col-title" data-i18n="footer_col3">Social</span>
+        <div class="footer-links">
+          <a href="https://www.instagram.com/omnithia/">Instagram</a>
+          <a href="#">LinkedIn</a>
+          <a href="#">X</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy" data-i18n="footer_copy">© 2026 Omnithia. What begins, becomes.</span>
+      <div class="footer-legal">
+        <a href="#" data-i18n="legal_privacy">Privacy</a>
+        <a href="#" data-i18n="legal_terms">Terms of Use</a>
+        <a href="#" data-i18n="legal_gdpr">GDPR</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── TRANSLATIONS ──────────────────────────────────────────────
+const T = {
+  en:{flag:'🇬🇧',code:'EN',tagline:'What begins, becomes.',nav_how:'How It Works',nav_shopping:'Shopping',nav_brands:'For Brands',nav_platforms:'Platforms',nav_signin:'Sign In',nav_early:'Early Access',hero_h1a:'Feel it',hero_h1b:'before',hero_h1c:'you wear it.',hero_sub:"Shopping is no longer a guessing game. See it on your virtual twin before you decide — open a store or just shop, it's your universe.",hero_cta1:'Get Early Access',hero_cta2:'How It Works',hero_scroll:'Scroll',mq1:'Virtual Twin Technology',mq2:'3D Commerce Platform',mq3:'Social Fitting Room',mq4:'Zero Returns Vision',mq5:'Mobile · PC · VR',mq6:'Experience Before You Own',origin_tag:'Why Omnithia',origin_title1:'Born from a problem.',origin_title2:'Built into a universe.',origin_body1:"Millions of people order clothes online every day. The package arrives, they try it on — it never looks the way they imagined. They return it. The cycle never ends, because e-commerce still chains you to a flat screen.",origin_body2:"Omnithia breaks that cycle. Dress your virtual twin, see it from every angle — then decide.",founder_name:'Melihcan Demir',founder_role:'Founder, Omnithia',cloud_label:'Other e-commerce',bubble_source:'— Verified purchase',bubble1:'"Nothing like the photo. Completely different colour in real life."',bubble2:'"Ordered a medium, fits like an XS. Sending it back."',bubble3:'"I imagined it would look great on me. It didn\'t. At all."',bubble4:'"Fabric looks luxurious in the pictures. Feels cheap in person."',bubble5:'"They sent me a completely different item. Third time this month."',bubble6:'"Never ordering clothes online again. I can\'t tell what I\'m buying."',how_tag:'How It Works',how_title:'Three steps to a',how_title_em:'real experience.',step1_title:'Create your virtual twin',step1_desc:'Take a few photos with your phone. Omnithia builds your personal 3D avatar using your real body measurements.',step2_title:'Explore the virtual store',step2_desc:'Browse hundreds of brands. Find what you love, step into the fitting room — invite your friends too.',step3_title:'Wear it, see it, decide',step3_desc:'Dress your virtual twin. Inspect it from every angle. Buy with confidence — no surprises.',for_shoppers_tag:'For Shoppers',for_shoppers_h:'Truly feel it',for_shoppers_h_em:'before you buy.',for_shoppers_desc:"You don't have to trust a photo anymore. See how it fits, whether it's the right size — don't shop without knowing.",feat1_title:'Personal virtual twin',feat1_desc:'An avatar built with your exact measurements and appearance.',feat2_title:'Social fitting room',feat2_desc:'Invite friends into your fitting room and decide together.',feat3_title:'Buy with confidence',feat3_desc:'No regrets, no surprises — exactly what you wanted.',for_brands_tag:'For Brands',for_brands_h:'Invite your customers',for_brands_h_em:'into your universe.',for_brands_desc:'Open a store on Omnithia, present your products in 3D — let your customers try them on and see for themselves before buying.',bfeat1_title:'Virtual store setup',bfeat1_desc:'Your brand, your layout — inside the Omnithia mall.',bfeat2_title:'3D product experience',bfeat2_desc:'Let your customers truly try on your products.',bfeat3_title:'Fewer returns, more trust',bfeat3_desc:'Sell without sizing uncertainty.',brands_cta:'Apply for a Store',plat_tag:'Platforms',plat_title:'Every device,',plat_title_em:'full experience.',plat1_badge:'In Development',plat1_name:'Mobile',plat1_desc:'The flow you know, with a new dimension. Add to cart, dress your virtual twin, rotate — decide.',plat2_badge:'Prototype Ready',plat2_name:'PC — 3D Universe',plat2_desc:'Roam freely through the virtual mall. Visit stores, enter the fitting room, invite your friends. Shopping becomes an experience.',plat3_badge:'Coming Soon',plat3_name:'VR',plat3_desc:'Full immersion. Feel the clothing on you for real. The deepest layer of the Omnithia universe.',wait_title:'Be among the',wait_title_em:'first to experience it.',wait_sub:"We'll let you know when Omnithia opens. Whether you want to shop or open a store.",wait_placeholder:'Your email address',wait_btn:'Join the List',wait_note:'No spam. Unsubscribe anytime.',inv_tag:'For Investors',inv_text:'Omnithia is transforming e-commerce into',inv_text_em:'a virtual experience.',inv_text2:"If you want to join the team or invest, let's talk.",inv_btn:'Get in Touch',cta_sub:'Omnithia is just beginning. Be part of it from the start.',cta_note:'Free · No commitment',footer_desc:'The platform transforming e-commerce into a virtual experience. See before you buy. Experience before you decide.',footer_col1:'Platform',footer_col2:'Company',footer_col3:'Social',footer_about:'About',footer_contact:'Contact',footer_careers:'Careers',footer_press:'Press',legal_privacy:'Privacy',legal_terms:'Terms of Use',legal_gdpr:'GDPR',footer_copy:'© 2026 Omnithia. What begins, becomes.'},
+
+  tr:{flag:'🇹🇷',code:'TR',tagline:'What begins, becomes.',nav_how:'Nasıl Çalışır',nav_shopping:'Alışveriş',nav_brands:'Markalar',nav_platforms:'Platformlar',nav_signin:'Giriş Yap',nav_early:'Erken Erişim',hero_h1a:'Giymeden',hero_h1b:'önce',hero_h1c:'hisset.',hero_sub:"Alışveriş artık bir tahmin oyunu değil. Kararından önce sanal ikizinde gör — mağazanı aç ya da sadece alışveriş yap, bu senin evrenin.",hero_cta1:'Erken Erişim Al',hero_cta2:'Nasıl Çalışır',hero_scroll:'Kaydır',mq1:'Sanal İkiz Teknolojisi',mq2:'3D Ticaret Platformu',mq3:'Sosyal Giyinme Odası',mq4:'Sıfır İade Vizyonu',mq5:'Mobil · PC · VR',mq6:'Sahip Olmadan Önce Deneyimle',origin_tag:'Neden Omnithia',origin_title1:'Bir sorundan doğdu.',origin_title2:'Bir evren inşa etti.',origin_body1:"Milyonlarca insan her gün online kıyafet sipariş veriyor. Kargo geliyor, deniyorlar — çoğu hayal ettikleri gibi durmuyor. İade ediyorlar. Bu döngü bitmez, çünkü e-ticaret sizi hâlâ bir ekrana bakmaya mahkum ediyor.",origin_body2:"Omnithia bu döngüyü kırıyor. Sanal ikizinle giy, her açıdan gör — sonra karar ver.",founder_name:'Melihcan Demir',founder_role:'Kurucu, Omnithia',cloud_label:'Diğer e-ticaret siteleri',bubble_source:'— Onaylı satın alma',bubble1:'"Fotoğraftaki gibi hiç değil. Gerçekte tamamen farklı bir renk."',bubble2:'"Orta beden sipariş ettim, XS gibi. İade ediyorum."',bubble3:'"Üzerimde harika duracağını hayal etmiştim. Hiç öyle durmadı."',bubble4:'"Resimlerde kumaş lüks görünüyor. Elde ucuz hissettiriyor."',bubble5:'"Tamamen farklı bir ürün gönderdiler. Bu ay üçüncü kez."',bubble6:'"Bir daha online kıyafet sipariş etmeyeceğim. Ne aldığımı anlayamıyorum."',how_tag:'Nasıl Çalışır',how_title:'Üç adımda',how_title_em:'gerçek deneyim.',step1_title:'Sanal ikizini oluştur',step1_desc:'Telefonunla birkaç fotoğraf çek. Omnithia, gerçek vücut ölçülerinle kişisel 3D avatarını oluşturur.',step2_title:'Sanal mağazada gez',step2_desc:'Yüzlerce marka arasında dolaş. Ürünleri beğen, giyinme odasına gir — arkadaşlarını da davet et.',step3_title:'Giy, gör, karar ver',step3_desc:'Kıyafeti sanal ikizine giydir. Her açıdan incele. Ne aldığını bilerek, gönül rahatlığıyla satın al.',for_shoppers_tag:'Alışveriş Yapanlar İçin',for_shoppers_h:'Satın almadan önce',for_shoppers_h_em:'gerçekten hisset.',for_shoppers_desc:"Artık fotoğrafa güvenmek zorunda değilsin. Kıyafet üzerinde nasıl durur, tam beden mi — bunu görmeden alışveriş yapma.",feat1_title:'Kişisel sanal ikiz',feat1_desc:'Senin ölçülerinle, senin görünüminle oluşturulan avatar.',feat2_title:'Sosyal giyinme odası',feat2_desc:'Arkadaşlarını giyinme odasına davet et, birlikte karar verin.',feat3_title:'Güvenle al',feat3_desc:'Pişmanlık yok, beklenti farkı yok — tam istediğin.',for_brands_tag:'Markalar İçin',for_brands_h:'Müşterini',for_brands_h_em:'evrenine davet et.',for_brands_desc:"Omnithia'da bir mağaza aç, ürünlerini 3D olarak sun — müşterilerin giyip görsün, sonra satın alsın.",bfeat1_title:'Sanal mağaza kurulumu',bfeat1_desc:"Kendi markan, kendi düzenin — Omnithia AVM'sinde.",bfeat2_title:'3D ürün deneyimi',bfeat2_desc:'Müşterilerin ürünü gerçekten denemesini sağla.',bfeat3_title:'Daha az iade, daha fazla güven',bfeat3_desc:'Beden uyumsuzluğu olmadan satış.',brands_cta:'Mağaza Başvurusu',plat_tag:'Platformlar',plat_title:'Her cihazda,',plat_title_em:'tam deneyim.',plat1_badge:'Geliştiriliyor',plat1_name:'Mobil',plat1_desc:'Alışık olduğun akışla, yeni bir katman. Sepete ekle, sanal ikizine giydir, döndür — karar ver.',plat2_badge:'Prototip Hazır',plat2_name:'PC — 3D Evren',plat2_desc:"Sanal AVM'de özgürce gez. Mağazaları ziyaret et, giyinme odasına gir, arkadaşlarını davet et.",plat3_badge:'Yakında',plat3_name:'VR',plat3_desc:'Tam immersiyon. Kıyafeti gerçekten üzerinde hisset. Omnithia evreninin en derin katmanı.',wait_title:'İlk deneyimleyenlerden',wait_title_em:'ol.',wait_sub:"Omnithia açıldığında seni haberdar edelim. İster alışveriş yap, ister mağazanı aç.",wait_placeholder:'E-posta adresin',wait_btn:'Listeye Katıl',wait_note:'Spam yok. İstediğinde çıkabilirsin.',inv_tag:'Yatırımcılar İçin',inv_text:'Omnithia, e-ticareti',inv_text_em:'sanal bir deneyime dönüştürüyor.',inv_text2:"Ekibe katılmak veya yatırım yapmak istiyorsan konuşalım.",inv_btn:'İletişime Geç',cta_sub:'Omnithia henüz başlıyor. Sen de başından dahil ol.',cta_note:'Ücretsiz · Bağlayıcı değil',footer_desc:'E-ticareti sanal bir deneyime dönüştüren platform.',footer_col1:'Platform',footer_col2:'Şirket',footer_col3:'Sosyal',footer_about:'Hakkımızda',footer_contact:'İletişim',footer_careers:'Kariyer',footer_press:'Basın',legal_privacy:'Gizlilik',legal_terms:'Kullanım Şartları',legal_gdpr:'KVKK',footer_copy:'© 2026 Omnithia. What begins, becomes.'},
+
+  de:{flag:'🇩🇪',code:'DE',tagline:'What begins, becomes.',nav_how:"So funktioniert's",nav_shopping:'Einkaufen',nav_brands:'Für Marken',nav_platforms:'Plattformen',nav_signin:'Anmelden',nav_early:'Früher Zugang',hero_h1a:'Spür es',hero_h1b:'bevor',hero_h1c:'du es trägst.',hero_sub:"Shopping ist kein Ratespiel mehr. Sieh es an deinem virtuellen Zwilling, bevor du entscheidest — eröffne einen Store oder shoppe einfach, es ist dein Universum.",hero_cta1:'Frühen Zugang sichern',hero_cta2:"So funktioniert's",hero_scroll:'Scrollen',mq1:'Virtueller Zwilling',mq2:'3D-Commerce-Plattform',mq3:'Soziale Umkleidekabine',mq4:'Null Retouren Vision',mq5:'Mobil · PC · VR',mq6:'Erleben bevor du besitzt',origin_tag:'Warum Omnithia',origin_title1:'Aus einem Problem geboren.',origin_title2:'Zu einem Universum geworden.',origin_body1:"Millionen von Menschen bestellen täglich Kleidung online. Das Paket kommt, sie probieren es an — es sieht nie so aus wie vorgestellt. Sie schicken es zurück. Der Kreislauf endet nie, weil E-Commerce sie immer noch an einen flachen Bildschirm kettet.",origin_body2:"Omnithia durchbricht diesen Kreislauf. Kleide deinen virtuellen Zwilling ein, sieh ihn aus jedem Winkel — dann entscheide.",founder_name:'Melihcan Demir',founder_role:'Gründer, Omnithia',cloud_label:'Andere Online-Shops',bubble_source:'— Verifizierter Kauf',bubble1:'"Sieht dem Foto überhaupt nicht ähnlich. Im echten Leben komplett andere Farbe."',bubble2:'"Medium bestellt, sitzt wie XS. Schicke es zurück."',bubble3:'"Ich dachte, es würde toll aussehen. Tat es nicht. Überhaupt nicht."',bubble4:'"Der Stoff sieht auf den Bildern luxuriös aus. Fühlt sich billig an."',bubble5:'"Sie haben mir ein völlig anderes Produkt geschickt. Drittes Mal diesen Monat."',bubble6:'"Ich bestelle nie wieder Kleidung online."',how_tag:"So funktioniert's",how_title:'Drei Schritte zu einem',how_title_em:'echten Erlebnis.',step1_title:'Deinen virtuellen Zwilling erstellen',step1_desc:'Mach ein paar Fotos mit deinem Handy. Omnithia erstellt deinen persönlichen 3D-Avatar anhand deiner echten Körpermaße.',step2_title:'Den virtuellen Store entdecken',step2_desc:'Stöbere durch hunderte Marken. Finde was du liebst, betritt die Umkleidekabine — lade auch deine Freunde ein.',step3_title:'Anziehen, sehen, entscheiden',step3_desc:'Kleide deinen virtuellen Zwilling ein. Inspiziere ihn aus jedem Winkel. Kaufe mit Vertrauen — keine Überraschungen.',for_shoppers_tag:'Für Shopper',for_shoppers_h:'Wirklich spüren',for_shoppers_h_em:'bevor du kaufst.',for_shoppers_desc:"Du musst einem Foto nicht mehr vertrauen. Sieh, wie es sitzt — shoppe nicht ohne es zu wissen.",feat1_title:'Persönlicher virtueller Zwilling',feat1_desc:'Ein Avatar, der mit deinen genauen Maßen erstellt wurde.',feat2_title:'Soziale Umkleidekabine',feat2_desc:'Lade Freunde in deine Umkleidekabine ein und entscheide gemeinsam.',feat3_title:'Mit Vertrauen kaufen',feat3_desc:'Keine Reue, keine Überraschungen — genau das, was du wolltest.',for_brands_tag:'Für Marken',for_brands_h:'Lade deine Kunden',for_brands_h_em:'in dein Universum ein.',for_brands_desc:'Eröffne einen Store auf Omnithia, präsentiere deine Produkte in 3D.',bfeat1_title:'Virtueller Store-Aufbau',bfeat1_desc:'Deine Marke, dein Layout — im Omnithia-Mall.',bfeat2_title:'3D-Produkterlebnis',bfeat2_desc:'Lass deine Kunden deine Produkte wirklich anprobieren.',bfeat3_title:'Weniger Retouren, mehr Vertrauen',bfeat3_desc:'Verkaufe ohne Größenunsicherheit.',brands_cta:'Store beantragen',plat_tag:'Plattformen',plat_title:'Jedes Gerät,',plat_title_em:'volles Erlebnis.',plat1_badge:'In Entwicklung',plat1_name:'Mobil',plat1_desc:'Der Flow, den du kennst, mit einer neuen Dimension.',plat2_badge:'Prototyp bereit',plat2_name:'PC — 3D-Universum',plat2_desc:'Streife frei durch das virtuelle Mall. Besuche Stores, betritt die Umkleidekabine.',plat3_badge:'Demnächst',plat3_name:'VR',plat3_desc:'Volle Immersion. Spüre die Kleidung wirklich an dir.',wait_title:'Sei unter den',wait_title_em:'Ersten, die es erleben.',wait_sub:"Wir informieren dich, wenn Omnithia öffnet.",wait_placeholder:'Deine E-Mail-Adresse',wait_btn:'Auf die Liste',wait_note:'Kein Spam. Jederzeit abmelden.',inv_tag:'Für Investoren',inv_text:'Omnithia transformiert E-Commerce in',inv_text_em:'ein virtuelles Erlebnis.',inv_text2:"Wenn du dem Team beitreten oder investieren möchtest, lass uns reden.",inv_btn:'Kontakt aufnehmen',cta_sub:'Omnithia fängt gerade erst an. Sei von Anfang an dabei.',cta_note:'Kostenlos · Unverbindlich',footer_desc:'Die Plattform, die E-Commerce in ein virtuelles Erlebnis verwandelt.',footer_col1:'Plattform',footer_col2:'Unternehmen',footer_col3:'Sozial',footer_about:'Über uns',footer_contact:'Kontakt',footer_careers:'Karriere',footer_press:'Presse',legal_privacy:'Datenschutz',legal_terms:'Nutzungsbedingungen',legal_gdpr:'DSGVO',footer_copy:'© 2026 Omnithia. What begins, becomes.'},
+
+  fr:{flag:'🇫🇷',code:'FR',tagline:'What begins, becomes.',nav_how:'Comment ça marche',nav_shopping:'Shopping',nav_brands:'Pour les marques',nav_platforms:'Plateformes',nav_signin:'Se connecter',nav_early:'Accès anticipé',hero_h1a:'Ressentez-le',hero_h1b:'avant',hero_h1c:'de le porter.',hero_sub:"Le shopping n'est plus un jeu de devinettes. Voyez-le sur votre jumeau virtuel avant de décider — ouvrez une boutique ou faites du shopping, c'est votre univers.",hero_cta1:'Obtenir un accès anticipé',hero_cta2:'Comment ça marche',hero_scroll:'Défiler',mq1:'Technologie Jumeau Virtuel',mq2:'Plateforme Commerce 3D',mq3:"Cabine d'Essayage Sociale",mq4:'Vision Zéro Retour',mq5:'Mobile · PC · VR',mq6:'Vivez Avant de Posséder',origin_tag:'Pourquoi Omnithia',origin_title1:"Né d'un problème.",origin_title2:'Construit en univers.',origin_body1:"Des millions de personnes commandent des vêtements en ligne chaque jour. Le colis arrive, elles essaient — ça ne ressemble jamais à ce qu'elles imaginaient. Le cycle ne s'arrête jamais.",origin_body2:"Omnithia brise ce cycle. Habillez votre jumeau virtuel, voyez-le sous tous les angles — puis décidez.",founder_name:'Melihcan Demir',founder_role:'Fondateur, Omnithia',cloud_label:'Autres e-commerces',bubble_source:'— Achat vérifié',bubble1:'\u201cRien à voir avec la photo. Couleur complètement différente en vrai.\u201d',bubble2:"\u201cJ\u2019ai commandé un medium, ça taille XS. Je le renvoie.\u201d",bubble3:"\u201cJ\u2019imaginais que ça m\u2019irait bien. Pas du tout.\u201d",bubble4:'\u201cLe tissu a l\u2019air luxueux sur les photos. Bon marché en vrai.\u201d',bubble5:'\u201cIls m\u2019ont envoyé un article complètement différent.\u201d',bubble6:"\u201cJe ne commanderai plus jamais de vêtements en ligne.\u201d",how_tag:'Comment ça marche',how_title:'Trois étapes vers une',how_title_em:'vraie expérience.',step1_title:'Créez votre jumeau virtuel',step1_desc:'Prenez quelques photos avec votre téléphone. Omnithia crée votre avatar 3D personnel.',step2_title:'Explorez la boutique virtuelle',step2_desc:"Parcourez des centaines de marques. Trouvez ce que vous aimez, entrez dans la cabine d'essayage.",step3_title:'Portez, voyez, décidez',step3_desc:'Habillez votre jumeau virtuel. Inspectez-le sous tous les angles. Achetez en toute confiance.',for_shoppers_tag:'Pour les acheteurs',for_shoppers_h:'Ressentez vraiment',for_shoppers_h_em:"avant d'acheter.",for_shoppers_desc:"Vous n'avez plus à faire confiance à une photo. Voyez comment ça s'ajuste.",feat1_title:'Jumeau virtuel personnel',feat1_desc:'Un avatar créé avec vos mensurations exactes.',feat2_title:"Cabine d'essayage sociale",feat2_desc:"Invitez des amis dans votre cabine d'essayage et décidez ensemble.",feat3_title:'Achetez en confiance',feat3_desc:'Pas de regrets, pas de surprises — exactement ce que vous vouliez.',for_brands_tag:'Pour les marques',for_brands_h:'Invitez vos clients',for_brands_h_em:'dans votre univers.',for_brands_desc:"Ouvrez une boutique sur Omnithia, présentez vos produits en 3D.",bfeat1_title:'Configuration de boutique virtuelle',bfeat1_desc:'Votre marque, votre mise en page — dans le mall Omnithia.',bfeat2_title:'Expérience produit 3D',bfeat2_desc:'Laissez vos clients vraiment essayer vos produits.',bfeat3_title:'Moins de retours, plus de confiance',bfeat3_desc:'Vendez sans incertitude de taille.',brands_cta:'Demander une boutique',plat_tag:'Plateformes',plat_title:'Chaque appareil,',plat_title_em:'expérience complète.',plat1_badge:'En développement',plat1_name:'Mobile',plat1_desc:'Le flux que vous connaissez, avec une nouvelle dimension.',plat2_badge:'Prototype prêt',plat2_name:'PC — Univers 3D',plat2_desc:"Promenez-vous librement dans le mall virtuel. Visitez des boutiques, entrez dans la cabine d'essayage.",plat3_badge:'Bientôt',plat3_name:'VR',plat3_desc:"Immersion totale. Ressentez les vêtements sur vous pour de vrai.",wait_title:'Soyez parmi les',wait_title_em:'premiers à le vivre.',wait_sub:"Nous vous préviendrons quand Omnithia ouvrira.",wait_placeholder:'Votre adresse e-mail',wait_btn:'Rejoindre la liste',wait_note:'Pas de spam. Désabonnez-vous à tout moment.',inv_tag:'Pour les investisseurs',inv_text:'Omnithia transforme le e-commerce en',inv_text_em:'une expérience virtuelle.',inv_text2:"Si vous voulez rejoindre l'équipe ou investir, parlons-en.",inv_btn:'Prendre contact',cta_sub:'Omnithia commence tout juste. Faites-en partie dès le début.',cta_note:'Gratuit · Sans engagement',footer_desc:"La plateforme qui transforme le e-commerce en expérience virtuelle.",footer_col1:'Plateforme',footer_col2:'Entreprise',footer_col3:'Réseaux',footer_about:'À propos',footer_contact:'Contact',footer_careers:'Carrières',footer_press:'Presse',legal_privacy:'Confidentialité',legal_terms:"Conditions d'utilisation",legal_gdpr:'RGPD',footer_copy:'© 2026 Omnithia. What begins, becomes.'},
+
+  it:{flag:'🇮🇹',code:'IT',tagline:'What begins, becomes.',nav_how:'Come funziona',nav_shopping:'Shopping',nav_brands:'Per i brand',nav_platforms:'Piattaforme',nav_signin:'Accedi',nav_early:'Accesso anticipato',hero_h1a:'Sentilo',hero_h1b:'prima',hero_h1c:'di indossarlo.',hero_sub:"Lo shopping non è più un gioco d'indovinelli. Guardalo sul tuo gemello virtuale prima di decidere — apri un negozio o semplicemente fai shopping, è il tuo universo.",hero_cta1:'Ottieni accesso anticipato',hero_cta2:'Come funziona',hero_scroll:'Scorri',mq1:'Tecnologia Gemello Virtuale',mq2:'Piattaforma Commerce 3D',mq3:'Camerino Sociale',mq4:'Visione Zero Resi',mq5:'Mobile · PC · VR',mq6:'Vivi Prima di Possedere',origin_tag:'Perché Omnithia',origin_title1:'Nato da un problema.',origin_title2:'Costruito in un universo.',origin_body1:"Milioni di persone ordinano vestiti online ogni giorno. Il pacco arriva, lo provano — non sembra mai come lo avevano immaginato. Lo restituiscono. Il ciclo non finisce mai.",origin_body2:"Omnithia rompe questo ciclo. Vesti il tuo gemello virtuale, guardalo da ogni angolo — poi decidi.",founder_name:'Melihcan Demir',founder_role:'Fondatore, Omnithia',cloud_label:'Altri e-commerce',bubble_source:'— Acquisto verificato',bubble1:'"Per niente come la foto. Colore completamente diverso nella realtà."',bubble2:'"Ho ordinato una media, veste come una XS. La rispedisco."',bubble3:'"Immaginavo che mi stesse benissimo. Non era così. Per niente."',bubble4:'"Il tessuto sembra lussuoso nelle foto. Si sente economico dal vivo."',bubble5:'"Mi hanno mandato un articolo completamente diverso. Terza volta."',bubble6:'"Non ordinerò mai più vestiti online."',how_tag:'Come funziona',how_title:'Tre passi verso una',how_title_em:'vera esperienza.',step1_title:'Crea il tuo gemello virtuale',step1_desc:'Scatta alcune foto con il tuo telefono. Omnithia costruisce il tuo avatar 3D personale.',step2_title:'Esplora il negozio virtuale',step2_desc:'Sfoglia centinaia di brand. Trova ciò che ami, entra nel camerino — invita anche i tuoi amici.',step3_title:'Indossa, guarda, decidi',step3_desc:'Vesti il tuo gemello virtuale. Ispezionalo da ogni angolo. Acquista con fiducia.',for_shoppers_tag:'Per gli acquirenti',for_shoppers_h:'Sentilo davvero',for_shoppers_h_em:'prima di acquistare.',for_shoppers_desc:"Non devi più fidarti di una foto. Guarda come si adatta.",feat1_title:'Gemello virtuale personale',feat1_desc:'Un avatar costruito con le tue misure esatte.',feat2_title:'Camerino sociale',feat2_desc:'Invita gli amici nel tuo camerino e decidete insieme.',feat3_title:'Acquista con fiducia',feat3_desc:'Nessun rimpianto, nessuna sorpresa — esattamente quello che volevi.',for_brands_tag:'Per i brand',for_brands_h:'Invita i tuoi clienti',for_brands_h_em:'nel tuo universo.',for_brands_desc:'Apri un negozio su Omnithia, presenta i tuoi prodotti in 3D.',bfeat1_title:'Configurazione negozio virtuale',bfeat1_desc:'Il tuo brand, il tuo layout — nel mall di Omnithia.',bfeat2_title:'Esperienza prodotto 3D',bfeat2_desc:'Lascia che i tuoi clienti provino davvero i tuoi prodotti.',bfeat3_title:'Meno resi, più fiducia',bfeat3_desc:'Vendi senza incertezza sulle taglie.',brands_cta:'Richiedi un negozio',plat_tag:'Piattaforme',plat_title:'Ogni dispositivo,',plat_title_em:'esperienza completa.',plat1_badge:'In sviluppo',plat1_name:'Mobile',plat1_desc:'Il flusso che conosci, con una nuova dimensione.',plat2_badge:'Prototipo pronto',plat2_name:'PC — Universo 3D',plat2_desc:"Gira liberamente nel mall virtuale. Visita i negozi, entra nel camerino.",plat3_badge:'Prossimamente',plat3_name:'VR',plat3_desc:"Immersione totale. Senti i vestiti su di te per davvero.",wait_title:'Sii tra i',wait_title_em:'primi a viverlo.',wait_sub:"Ti avviseremo quando Omnithia aprirà.",wait_placeholder:'Il tuo indirizzo email',wait_btn:'Unisciti alla lista',wait_note:'Nessuno spam. Cancellati quando vuoi.',inv_tag:'Per gli investitori',inv_text:"Omnithia sta trasformando l'e-commerce in",inv_text_em:'\u201dun\u2019esperienza virtuale.',inv_text2:"Se vuoi unirti al team o investire, parliamone.",inv_btn:'Contattaci',cta_sub:"Omnithia sta appena iniziando. Fai parte di questo fin dall'inizio.",cta_note:'Gratuito · Senza impegno',footer_desc:"La piattaforma che trasforma l'e-commerce in un'esperienza virtuale.",footer_col1:'Piattaforma',footer_col2:'Azienda',footer_col3:'Social',footer_about:'Chi siamo',footer_contact:'Contatto',footer_careers:'Carriere',footer_press:'Stampa',legal_privacy:'Privacy',legal_terms:'Termini di utilizzo',legal_gdpr:'GDPR',footer_copy:'© 2026 Omnithia. What begins, becomes.'},
+
+  es:{flag:'🇪🇸',code:'ES',tagline:'What begins, becomes.',nav_how:'Cómo funciona',nav_shopping:'Compras',nav_brands:'Para marcas',nav_platforms:'Plataformas',nav_signin:'Iniciar sesión',nav_early:'Acceso anticipado',hero_h1a:'Siéntelo',hero_h1b:'antes',hero_h1c:'de llevarlo.',hero_sub:"Las compras ya no son un juego de adivinanzas. Míralo en tu gemelo virtual antes de decidir — abre una tienda o simplemente compra, es tu universo.",hero_cta1:'Obtener acceso anticipado',hero_cta2:'Cómo funciona',hero_scroll:'Desplazar',mq1:'Tecnología Gemelo Virtual',mq2:'Plataforma Commerce 3D',mq3:'Probador Social',mq4:'Visión Cero Devoluciones',mq5:'Móvil · PC · VR',mq6:'Vive Antes de Poseer',origin_tag:'Por qué Omnithia',origin_title1:'Nacido de un problema.',origin_title2:'Construido en un universo.',origin_body1:"Millones de personas piden ropa online cada día. El paquete llega, se lo prueban — nunca se ve como imaginaban. Lo devuelven. El ciclo nunca termina.",origin_body2:"Omnithia rompe ese ciclo. Viste a tu gemelo virtual, míralo desde todos los ángulos — luego decide.",founder_name:'Melihcan Demir',founder_role:'Fundador, Omnithia',cloud_label:'Otros e-commerce',bubble_source:'— Compra verificada',bubble1:'"Nada que ver con la foto. Color completamente diferente en la vida real."',bubble2:'"Pedí una mediana, queda como una XS. Lo devuelvo."',bubble3:'"Imaginé que me quedaría genial. Para nada."',bubble4:'"La tela parece lujosa en las fotos. Se siente barata en persona."',bubble5:'"Me enviaron un artículo completamente diferente. Tercera vez este mes."',bubble6:'"Nunca más pediré ropa online."',how_tag:'Cómo funciona',how_title:'Tres pasos hacia una',how_title_em:'experiencia real.',step1_title:'Crea tu gemelo virtual',step1_desc:'Toma algunas fotos con tu teléfono. Omnithia construye tu avatar 3D personal.',step2_title:'Explora la tienda virtual',step2_desc:'Navega por cientos de marcas. Encuentra lo que amas, entra al probador.',step3_title:'Úsalo, míralo, decide',step3_desc:'Viste a tu gemelo virtual. Inspecciona desde todos los ángulos. Compra con confianza.',for_shoppers_tag:'Para compradores',for_shoppers_h:'Siéntelo de verdad',for_shoppers_h_em:'antes de comprar.',for_shoppers_desc:"Ya no tienes que confiar en una foto. Ve cómo queda.",feat1_title:'Gemelo virtual personal',feat1_desc:'Un avatar creado con tus medidas exactas.',feat2_title:'Probador social',feat2_desc:'Invita amigos a tu probador y decidan juntos.',feat3_title:'Compra con confianza',feat3_desc:'Sin arrepentimientos, sin sorpresas — exactamente lo que querías.',for_brands_tag:'Para marcas',for_brands_h:'Invita a tus clientes',for_brands_h_em:'a tu universo.',for_brands_desc:'Abre una tienda en Omnithia, presenta tus productos en 3D.',bfeat1_title:'Configuración de tienda virtual',bfeat1_desc:'Tu marca, tu diseño — en el mall de Omnithia.',bfeat2_title:'Experiencia de producto 3D',bfeat2_desc:'Deja que tus clientes realmente prueben tus productos.',bfeat3_title:'Menos devoluciones, más confianza',bfeat3_desc:'Vende sin incertidumbre de talla.',brands_cta:'Solicitar una tienda',plat_tag:'Plataformas',plat_title:'Cada dispositivo,',plat_title_em:'experiencia completa.',plat1_badge:'En desarrollo',plat1_name:'Móvil',plat1_desc:'El flujo que conoces, con una nueva dimensión.',plat2_badge:'Prototipo listo',plat2_name:'PC — Universo 3D',plat2_desc:'Pasea libremente por el mall virtual. Visita tiendas, entra al probador.',plat3_badge:'Próximamente',plat3_name:'VR',plat3_desc:'Inmersión total. Siente la ropa en ti de verdad.',wait_title:'Sé de los',wait_title_em:'primeros en experimentarlo.',wait_sub:"Te avisaremos cuando Omnithia abra.",wait_placeholder:'Tu dirección de email',wait_btn:'Unirse a la lista',wait_note:'Sin spam. Cancela cuando quieras.',inv_tag:'Para inversores',inv_text:'Omnithia está transformando el e-commerce en',inv_text_em:'una experiencia virtual.',inv_text2:"Si quieres unirte al equipo o invertir, hablemos.",inv_btn:'Ponerse en contacto',cta_sub:'Omnithia apenas está comenzando. Sé parte de esto desde el principio.',cta_note:'Gratis · Sin compromiso',footer_desc:'La plataforma que transforma el e-commerce en una experiencia virtual.',footer_col1:'Plataforma',footer_col2:'Empresa',footer_col3:'Social',footer_about:'Acerca de',footer_contact:'Contacto',footer_careers:'Carreras',footer_press:'Prensa',legal_privacy:'Privacidad',legal_terms:'Términos de uso',legal_gdpr:'RGPD',footer_copy:'© 2026 Omnithia. What begins, becomes.'},
+
+  pt:{flag:'🇧🇷',code:'PT',tagline:'What begins, becomes.',nav_how:'Como funciona',nav_shopping:'Compras',nav_brands:'Para marcas',nav_platforms:'Plataformas',nav_signin:'Entrar',nav_early:'Acesso antecipado',hero_h1a:'Sinta',hero_h1b:'antes',hero_h1c:'de vestir.',hero_sub:"Comprar não é mais um jogo de adivinhação. Veja no seu gêmeo virtual antes de decidir — abra uma loja ou apenas compre, é o seu universo.",hero_cta1:'Obter acesso antecipado',hero_cta2:'Como funciona',hero_scroll:'Rolar',mq1:'Tecnologia Gêmeo Virtual',mq2:'Plataforma Commerce 3D',mq3:'Provador Social',mq4:'Visão Zero Devoluções',mq5:'Mobile · PC · VR',mq6:'Viva Antes de Possuir',origin_tag:'Por que Omnithia',origin_title1:'Nascido de um problema.',origin_title2:'Construído em um universo.',origin_body1:"Milhões de pessoas pedem roupas online todos os dias. O pacote chega, experimentam — nunca fica como imaginavam. Devolvem. O ciclo nunca termina.",origin_body2:"Omnithia quebra esse ciclo. Vista o seu gêmeo virtual, veja de todos os ângulos — então decida.",founder_name:'Melihcan Demir',founder_role:'Fundador, Omnithia',cloud_label:'Outros e-commerces',bubble_source:'— Compra verificada',bubble1:'"Nada parecido com a foto. Cor completamente diferente na vida real."',bubble2:'"Pedi um médio, veste como um PP. Vou devolver."',bubble3:'"Imaginei que ficaria ótimo em mim. Não ficou."',bubble4:'"O tecido parece luxuoso nas fotos. Parece barato pessoalmente."',bubble5:'"Enviaram um artigo completamente diferente. Terceira vez neste mês."',bubble6:'"Nunca mais vou pedir roupas online."',how_tag:'Como funciona',how_title:'Três passos para uma',how_title_em:'experiência real.',step1_title:'Crie seu gêmeo virtual',step1_desc:'Tire algumas fotos com o seu celular. Omnithia cria seu avatar 3D pessoal.',step2_title:'Explore a loja virtual',step2_desc:'Navegue por centenas de marcas. Encontre o que ama, entre no provador.',step3_title:'Vista, veja, decida',step3_desc:'Vista o seu gêmeo virtual. Inspecione de todos os ângulos. Compre com confiança.',for_shoppers_tag:'Para compradores',for_shoppers_h:'Sinta de verdade',for_shoppers_h_em:'antes de comprar.',for_shoppers_desc:"Você não precisa mais confiar em uma foto. Veja como fica.",feat1_title:'Gêmeo virtual pessoal',feat1_desc:'Um avatar criado com suas medidas exatas.',feat2_title:'Provador social',feat2_desc:'Convide amigos para o seu provador e decidam juntos.',feat3_title:'Compre com confiança',feat3_desc:'Sem arrependimentos, sem surpresas — exatamente o que você queria.',for_brands_tag:'Para marcas',for_brands_h:'Convide seus clientes',for_brands_h_em:'para o seu universo.',for_brands_desc:'Abra uma loja na Omnithia, apresente seus produtos em 3D.',bfeat1_title:'Configuração de loja virtual',bfeat1_desc:'Sua marca, seu layout — no mall da Omnithia.',bfeat2_title:'Experiência de produto 3D',bfeat2_desc:'Deixe seus clientes realmente experimentar seus produtos.',bfeat3_title:'Menos devoluções, mais confiança',bfeat3_desc:'Venda sem incerteza de tamanho.',brands_cta:'Solicitar uma loja',plat_tag:'Plataformas',plat_title:'Cada dispositivo,',plat_title_em:'experiência completa.',plat1_badge:'Em desenvolvimento',plat1_name:'Mobile',plat1_desc:'O fluxo que você conhece, com uma nova dimensão.',plat2_badge:'Protótipo pronto',plat2_name:'PC — Universo 3D',plat2_desc:'Passeie livremente pelo mall virtual. Visite lojas, entre no provador.',plat3_badge:'Em breve',plat3_name:'VR',plat3_desc:'Imersão total. Sinta as roupas em você de verdade.',wait_title:'Seja um dos',wait_title_em:'primeiros a experimentar.',wait_sub:"Avisaremos quando a Omnithia abrir.",wait_placeholder:'Seu endereço de e-mail',wait_btn:'Entrar na lista',wait_note:'Sem spam. Cancele quando quiser.',inv_tag:'Para investidores',inv_text:'A Omnithia está transformando o e-commerce em',inv_text_em:'uma experiência virtual.',inv_text2:"Se quiser entrar para a equipe ou investir, vamos conversar.",inv_btn:'Entrar em contato',cta_sub:'A Omnithia está apenas começando. Faça parte disso desde o início.',cta_note:'Gratuito · Sem compromisso',footer_desc:'A plataforma que transforma o e-commerce em uma experiência virtual.',footer_col1:'Plataforma',footer_col2:'Empresa',footer_col3:'Social',footer_about:'Sobre nós',footer_contact:'Contato',footer_careers:'Carreiras',footer_press:'Imprensa',legal_privacy:'Privacidade',legal_terms:'Termos de uso',legal_gdpr:'LGPD',footer_copy:'© 2026 Omnithia. What begins, becomes.'}
+};
+
+let lang = 'en';
+function applyLang(l){
+  const t = T[l]; if(!t) return; lang = l;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k = el.getAttribute('data-i18n');
+    if(t[k]!==undefined) el.textContent = t[k];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{
+    const k = el.getAttribute('data-i18n-placeholder');
+    if(t[k]!==undefined) el.placeholder = t[k];
+  });
+  document.getElementById('lFlag').textContent = t.flag;
+  document.getElementById('lCode').textContent = t.code;
+  document.documentElement.lang = l;
+  document.querySelectorAll('.lang-opt').forEach(o=>o.classList.toggle('active', o.dataset.lang===l));
+}
+
+const lw = document.getElementById('langWrap');
+document.getElementById('langTrigger').addEventListener('click', e=>{e.stopPropagation();lw.classList.toggle('open')});
+document.addEventListener('click',()=>lw.classList.remove('open'));
+document.getElementById('langDrop').addEventListener('click',e=>e.stopPropagation());
+document.querySelectorAll('.lang-opt').forEach(o=>o.addEventListener('click',()=>{applyLang(o.dataset.lang);lw.classList.remove('open')}));
+
+// Cursor
+const cur = document.getElementById('cur'), ring = document.getElementById('cur-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px'});
+(function tick(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(tick)})();
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cur.style.transform='translate(-50%,-50%) scale(0)';ring.style.width='48px';ring.style.height='48px';ring.style.borderColor='var(--gold)'});
+  el.addEventListener('mouseleave',()=>{cur.style.transform='translate(-50%,-50%) scale(1)';ring.style.width='32px';ring.style.height='32px';ring.style.borderColor='var(--gold-line)'});
+});
+
+// Nav scroll
+window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('scrolled',window.scrollY>60));
+
+// Reveal
+const obs = new IntersectionObserver(entries=>{
+  entries.forEach((e,i)=>{if(e.isIntersecting){setTimeout(()=>e.target.classList.add('visible'),i*60);obs.unobserve(e.target)}});
+},{threshold:.1});
+document.querySelectorAll('.reveal,.reveal-left').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
